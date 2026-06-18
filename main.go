@@ -40,10 +40,12 @@ func main() {
 		if g.CurrentPlayer.Name == "Игрок" {
 			var row, col int
 			for {
-				fmt.Println("Твой ход!")
+				fmt.Println("Твой ход! Напиши номер строки и номер столбца через пробел")
 				_, err := fmt.Scanln(&row, &col)
 				if err != nil {
-					fmt.Println("Scan failed")
+					fmt.Println("Пожалуйста, введите два числа через пробел (например: 1 2)")
+					var discard string
+					fmt.Scanln(&discard)
 					continue
 				}
 				if g.HumanCall(row-1, col-1) {
@@ -63,7 +65,7 @@ func main() {
 			fmt.Println("Партия завершилась ничьей!")
 			break
 		}
-		if g.CurrentPlayer.Name == g.HumanPlayer.Name {
+		if g.CurrentPlayer.Name == "Игрок" {
 			g.CurrentPlayer = g.AiPlayer
 		} else {
 			g.CurrentPlayer = g.HumanPlayer

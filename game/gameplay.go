@@ -22,7 +22,7 @@ func (g *Game) AiCall() {
 	for {
 		row := rand.Intn(3)
 		col := rand.Intn(3)
-		if g.Board[row][col] == "_" {
+		if g.Board[row][col] == "-" {
 			g.Board[row][col] = g.AiPlayer.Symbol
 			break
 		}
@@ -35,7 +35,7 @@ func (g *Game) HumanCall(row, col int) bool {
 		fmt.Println("Неверные координаты")
 		return false
 	}
-	if g.Board[row][col] == "_" {
+	if g.Board[row][col] == "-" {
 		g.Board[row][col] = g.HumanPlayer.Symbol
 		return true
 	}
@@ -60,7 +60,7 @@ func NewGame(HumanSymbol string) *Game {
 	}
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 3; j++ {
-			g.Board[i][j] = "_"
+			g.Board[i][j] = "-"
 		}
 	}
 	if g.HumanPlayer.Symbol == "x" {
@@ -72,11 +72,14 @@ func NewGame(HumanSymbol string) *Game {
 }
 
 func (g *Game) PrintBoard() {
+	i := 1
+	fmt.Println("  1   2   3 ")
 	for row := 0; row < 3; row++ {
 		if row < 2 {
-			fmt.Printf(" %s | %s | %s\n---|---|---\n", g.Board[row][0], g.Board[row][1], g.Board[row][2])
+			fmt.Printf("%d %s | %s | %s\n ---|---|---\n", i, g.Board[row][0], g.Board[row][1], g.Board[row][2])
+			i++
 		} else {
-			fmt.Printf(" %s | %s | %s\n", g.Board[row][0], g.Board[row][1], g.Board[row][2])
+			fmt.Printf("3 %s | %s | %s\n", g.Board[row][0], g.Board[row][1], g.Board[row][2])
 		}
 	}
 }
@@ -98,7 +101,7 @@ func (g *Game) CheckWin(s string) bool {
 func (g *Game) CheckDraw() bool {
 	for row := 0; row < 3; row++ {
 		for col := 0; col < 3; col++ {
-			if g.Board[row][col] == "_" {
+			if g.Board[row][col] == "-" {
 				return false
 			}
 		}
