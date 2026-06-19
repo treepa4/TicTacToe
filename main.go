@@ -18,6 +18,7 @@ func main() {
 		fmt.Println("Scan failed")
 		return
 	}
+
 	humanS := scan.Text()
 	switch humanS {
 	case "х":
@@ -34,41 +35,8 @@ func main() {
 		humanS = strings.TrimSpace(strings.ToLower(humanS))
 	}
 	g := game.NewGame(humanS)
-	fmt.Println("Игровое поле: ")
-	g.PrintBoard()
-	for {
-		if g.CurrentPlayer.Name == "Игрок" {
-			var row, col int
-			for {
-				fmt.Println("Твой ход! Напиши номер строки и номер столбца через пробел")
-				_, err := fmt.Scanln(&row, &col)
-				if err != nil {
-					fmt.Println("Пожалуйста, введите два числа через пробел (например: 1 2)")
-					var discard string
-					fmt.Scanln(&discard)
-					continue
-				}
-				if g.HumanCall(row-1, col-1) {
-					break
-				}
+	g.HumanWinCount = 0
+	g.AiWinCount = 0
+	game.StartGame(g)
 
-			}
-		} else {
-			g.AiCall()
-		}
-		g.PrintBoard()
-		if g.CheckWin(g.CurrentPlayer.Symbol) {
-			fmt.Println("Партия завершилась победой ", g.CurrentPlayer.Name)
-			break
-		}
-		if g.CheckDraw() {
-			fmt.Println("Партия завершилась ничьей!")
-			break
-		}
-		if g.CurrentPlayer.Name == "Игрок" {
-			g.CurrentPlayer = g.AiPlayer
-		} else {
-			g.CurrentPlayer = g.HumanPlayer
-		}
-	}
 }

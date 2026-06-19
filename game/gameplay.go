@@ -1,8 +1,10 @@
 package game
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
+	"os"
 )
 
 type Player struct {
@@ -15,6 +17,8 @@ type Game struct {
 	HumanPlayer   Player
 	AiPlayer      Player
 	CurrentPlayer Player
+	AiWinCount    int
+	HumanWinCount int
 }
 
 func (g *Game) AiCall() {
@@ -72,14 +76,12 @@ func NewGame(HumanSymbol string) *Game {
 }
 
 func (g *Game) PrintBoard() {
-	i := 1
 	fmt.Println("  1   2   3 ")
 	for row := 0; row < 3; row++ {
 		if row < 2 {
-			fmt.Printf("%d %s | %s | %s\n ---|---|---\n", i, g.Board[row][0], g.Board[row][1], g.Board[row][2])
-			i++
+			fmt.Printf("%d %s | %s | %s\n ---|---|---\n", row+1, g.Board[row][0], g.Board[row][1], g.Board[row][2])
 		} else {
-			fmt.Printf("3 %s | %s | %s\n", g.Board[row][0], g.Board[row][1], g.Board[row][2])
+			fmt.Printf("%d %s | %s | %s\n", row+1, g.Board[row][0], g.Board[row][1], g.Board[row][2])
 		}
 	}
 }
@@ -107,4 +109,110 @@ func (g *Game) CheckDraw() bool {
 		}
 	}
 	return true
+}
+
+func (g *Game) PrintScore() {
+	fmt.Println("Отличная партия! Вот ваш счет:")
+	fmt.Printf("Вы: %d\n", g.HumanWinCount)
+	fmt.Printf("Протвник: %d\n", g.AiWinCount)
+}
+
+func StartGame(g *Game) {
+	for {
+		if g.CurrentPlayer.Name == "Игрок" {
+			var row, col int
+			for {
+				fmt.Println("Твой ход! Напиши номер строки и номер столбца через пробел")
+				g.PrintBoard()
+				_, err := fmt.Scanln(&row, &col)
+				if err != nil {
+					fmt.Println("Пожалуйста, введите два числа через пробел (например: 1 2)")
+					continue
+				}
+				if g.HumanCall(row-1, col-1) {
+					break
+				}
+
+			}
+		} else {
+			g.AiCall()
+		}
+		g.PrintBoard()
+		if g.CheckWin(g.CurrentPlayer.Symbol) {
+			fmt.Println("Партия завершилась победой ", g.CurrentPlayer.Name)
+			if g.CurrentPlayer.Name == "Игрок" {
+				g.HumanWinCount++
+				if AskNewGame(g) {
+					g.Reset()
+					continue
+				} else {
+					return
+				}
+
+			}
+			g.AiWinCount++
+			if AskNewGame(g) {
+				g.Reset()
+				continue
+			} else {
+				return
+			}
+
+		}
+		if g.CheckDraw() {
+			fmt.Println("Партия завершилась ничьей!")
+			g.HumanWinCount++
+			g.AiWinCount++
+			if AskNewGame(g) {
+				g.Reset()
+				continue
+			} else {
+				return
+			}
+
+		}
+		if g.CurrentPlayer.Name == "Игрок" {
+			g.CurrentPlayer = g.AiPlayer
+		} else {
+			g.CurrentPlayer = g.HumanPlayer
+		}
+
+	}
+
+}
+
+func (g *Game) Reset() {
+	for i := 0; i < 3; i++ {
+		for j := 0; j < 3; j++ {
+			g.Board[i][j] = "-"
+		}
+	}
+	if g.HumanPlayer.Symbol == "x" {
+		g.CurrentPlayer = g.HumanPlayer
+	} else {
+		g.CurrentPlayer = g.AiPlayer
+	}
+}
+func AskNewGame(g *Game) bool {
+	fmt.Println("Желаете ли вы продолжить? (y/n): ")
+	s := bufio.NewScanner(os.Stdin)
+	if ok := s.Scan(); !ok {
+		fmt.Println("Error reading input")
+		return false
+	}
+	answer := s.Text()
+	switch answer {
+	case "y":
+		if g.HumanPlayer.Symbol == "x" {
+			g.HumanPlayer.Symbol = "o"
+			g.AiPlayer.Symbol = "x"
+		} else {
+			g.HumanPlayer.Symbol = "x"
+			g.AiPlayer.Symbol = "o"
+		}
+		return true
+	case "n":
+		g.PrintScore()
+	}
+	return false
 }
