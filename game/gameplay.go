@@ -172,8 +172,7 @@ func StartGame(g *Game) {
 		if g.CheckDraw() {
 			g.PrintBoard()
 			fmt.Println("Партия завершилась ничьей!")
-			g.HumanWinCount++
-			g.AiWinCount++
+
 			if AskNewGame(g) {
 				g.Reset()
 				continue
