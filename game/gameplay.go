@@ -3,7 +3,6 @@ package game
 import (
 	"bufio"
 	"fmt"
-	"math/rand"
 	"os"
 )
 
@@ -23,14 +22,34 @@ type Game struct {
 
 func (g *Game) AiCall() {
 	fmt.Println("Ход компьютера...")
-	for {
-		row := rand.Intn(3)
-		col := rand.Intn(3)
-		if g.Board[row][col] == "-" {
-			g.Board[row][col] = g.AiPlayer.Symbol
-			break
+	row, col, res := g.AIFindWin(g.AiPlayer.Symbol)
+	if res {
+		g.Board[row][col] = g.AiPlayer.Symbol
+		return
+	}
+	row, col, res = g.AIFindWin(g.HumanPlayer.Symbol)
+	if res {
+		g.Board[row][col] = g.AiPlayer.Symbol
+		return
+	}
+	bs := -1000
+	var bestCol, bestRow int
+	for row := 0; row < 3; row++ {
+		for col := 0; col < 3; col++ {
+			if g.Board[row][col] == "-" {
+				g.Board[row][col] = g.AiPlayer.Symbol
+
+				score := g.MiniMax(0, false)
+				g.Board[row][col] = "-"
+				if score > bs {
+					bs = score
+					bestCol = col
+					bestRow = row
+				}
+			}
 		}
 	}
+	g.Board[bestRow][bestCol] = g.AiPlayer.Symbol
 	return
 }
 
@@ -137,8 +156,8 @@ func StartGame(g *Game) {
 		} else {
 			g.AiCall()
 		}
-		g.PrintBoard()
 		if g.CheckWin(g.CurrentPlayer.Symbol) {
+			g.PrintBoard()
 			fmt.Println("Партия завершилась победой ", g.CurrentPlayer.Name)
 			if g.CurrentPlayer.Name == "Игрок" {
 				g.HumanWinCount++
@@ -160,6 +179,7 @@ func StartGame(g *Game) {
 
 		}
 		if g.CheckDraw() {
+			g.PrintBoard()
 			fmt.Println("Партия завершилась ничьей!")
 			g.HumanWinCount++
 			g.AiWinCount++
@@ -215,4 +235,60 @@ func AskNewGame(g *Game) bool {
 		g.PrintScore()
 	}
 	return false
+}
+
+func (g *Game) AIFindWin(s string) (int, int, bool) {
+	for row := 0; row < 3; row++ {
+		for col := 0; col < 3; col++ {
+			if g.Board[row][col] == "-" {
+				g.Board[row][col] = s
+				if g.CheckWin(s) {
+					g.Board[row][col] = "-"
+					return row, col, true
+				}
+				g.Board[row][col] = "-"
+			}
+		}
+	}
+	return 0, 0, false
+}
+
+func (g *Game) MiniMax(depth int, isMax bool) int {
+	if g.CheckWin(g.AiPlayer.Symbol) {
+		return 10 - depth
+	}
+	if g.CheckWin(g.HumanPlayer.Symbol) {
+		return depth - 10
+	}
+	if g.CheckDraw() {
+		return 0
+	}
+	if isMax {
+		bs := -1000
+		for row := 0; row < 3; row++ {
+			for col := 0; col < 3; col++ {
+				if g.Board[row][col] == "-" {
+					g.Board[row][col] = g.AiPlayer.Symbol
+					score := g.MiniMax(depth+1, false)
+					g.Board[row][col] = "-"
+					bs = max(bs, score)
+
+				}
+			}
+		}
+		return bs
+	} else {
+		bs := 1000
+		for row := 0; row < 3; row++ {
+			for col := 0; col < 3; col++ {
+				if g.Board[row][col] == "-" {
+					g.Board[row][col] = g.HumanPlayer.Symbol
+					score := g.MiniMax(depth+1, true)
+					g.Board[row][col] = "-"
+					bs = min(bs, score)
+				}
+			}
+		}
+		return bs
+	}
 }
