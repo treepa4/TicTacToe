@@ -22,16 +22,7 @@ type Game struct {
 
 func (g *Game) AiCall() {
 	fmt.Println("Ход компьютера...")
-	row, col, res := g.AIFindWin(g.AiPlayer.Symbol)
-	if res {
-		g.Board[row][col] = g.AiPlayer.Symbol
-		return
-	}
-	row, col, res = g.AIFindWin(g.HumanPlayer.Symbol)
-	if res {
-		g.Board[row][col] = g.AiPlayer.Symbol
-		return
-	}
+
 	bs := -1000
 	var bestCol, bestRow int
 	for row := 0; row < 3; row++ {
@@ -237,21 +228,21 @@ func AskNewGame(g *Game) bool {
 	return false
 }
 
-func (g *Game) AIFindWin(s string) (int, int, bool) {
-	for row := 0; row < 3; row++ {
-		for col := 0; col < 3; col++ {
-			if g.Board[row][col] == "-" {
-				g.Board[row][col] = s
-				if g.CheckWin(s) {
-					g.Board[row][col] = "-"
-					return row, col, true
-				}
-				g.Board[row][col] = "-"
-			}
-		}
-	}
-	return 0, 0, false
-}
+//func (g *Game) AIFindWin(s string) (int, int, bool) {
+//	for row := 0; row < 3; row++ {
+//		for col := 0; col < 3; col++ {
+//			if g.Board[row][col] == "-" {
+//				g.Board[row][col] = s
+//				if g.CheckWin(s) {
+//					g.Board[row][col] = "-"
+//					return row, col, true
+//				}
+//				g.Board[row][col] = "-"
+//			}
+//		}
+//	}
+//	return 0, 0, false
+//}
 
 func (g *Game) MiniMax(depth int, isMax bool) int {
 	if g.CheckWin(g.AiPlayer.Symbol) {
